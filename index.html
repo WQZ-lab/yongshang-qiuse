@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甬上秋色 · 手势画册</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='6' fill='%239c3a2d'/%3E%3Crect x='9' y='9' width='46' height='46' fill='none' stroke='%23f8efe3' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<link rel="modulepreload" href="./vendor/mediapipe/vision_bundle.js">
+</head>
+<body>
+  <canvas id="stage"></canvas>
+
+  <div id="hud">
+    <!-- 左上：竖排题名与朱砂印 -->
+    <header id="brand">
+      <div class="brand-row">
+        <h1 id="brandTitle">甬上秋色</h1>
+        <div class="brand-side">
+          <span class="brand-en">NINGBO · IN AUTUMN</span>
+          <div class="seal seal-brand"><span>甬</span></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 左下：帧序、地名、题句与进度 -->
+    <footer id="chapter">
+      <div class="chap-meta">
+        <span id="idxNow">01</span><span class="chap-slash">/</span><span class="chap-total">09</span>
+        <span class="chap-rule"></span>
+        <span class="chap-place">甬城 · 秋</span>
+      </div>
+      <h2 id="placeName">东部新城</h2>
+      <p id="caption">楼群尚在远处，秋色已经进城</p>
+      <div id="ticks" aria-hidden="true"></div>
+    </footer>
+
+    <div id="hint">右手张合 · 秋色浓淡　｜　左手挥动 · 翻页　｜　捏合 · 放大</div>
+
+    <div id="soundCtl">
+      <button id="soundBtn" type="button" aria-label="静音 / 恢复声音" title="静音 / 恢复声音（M）">
+        <span id="muteGlyph">♪</span>
+        <span class="sound-label">静音 · 声音</span>
+      </button>
+    </div>
+
+    <!-- 右下：可拖动的摄像头回看 -->
+    <div id="camWrap" class="hidden">
+      <video id="cam" autoplay playsinline muted></video>
+      <canvas id="skel" width="1280" height="720"></canvas>
+      <div id="handTags">
+        <span id="tagLeft" class="hand-tag">左手</span>
+        <span id="tagRight" class="hand-tag">右手</span>
+      </div>
+    </div>
+
+    <div id="toast" aria-live="polite"></div>
+    <div id="errDetail" class="hidden" aria-live="polite"></div>
+  </div>
+
+  <!-- 进入页：操作说明只讲一次 -->
+  <div id="gate">
+    <div id="gateArt" aria-hidden="true"></div>
+    <div class="gate-panel">
+      <div class="gate-seal" title="甬上秋色"><span>甬</span><span>上</span><span>秋</span><span>色</span></div>
+      <p class="gate-overline">NINGBO · AUTUMN · NINE FRAMES</p>
+      <h2>让秋色<br>在掌心展开</h2>
+      <p class="gate-guide"><b>右手</b>张开，秋色渐浓；握拳，只余墨影。</p>
+      <p class="gate-guide"><b>左手</b>向左或向右一挥，翻过一帧甬城秋景。</p>
+      <p class="gate-guide"><b>拇指与食指</b>捏合，走近画里的细节。</p>
+      <p class="gate-guide gate-guide-alt">没有摄像头也能看完：空格显色 · ← → 翻页 · 滚轮放大</p>
+      <button id="startBtn" type="button">入 画</button>
+      <p class="gate-note">M 静音 · C 摄像头 · R 复位 · D 演示 · Esc 退出</p>
+    </div>
+    <p class="gate-credit">宁波 · 东部新城 · 秋</p>
+  </div>
+
+  <!-- 开场揭幕：纸褪去 -->
+  <div id="reveal" class="hidden" aria-hidden="true"><div class="reveal-veil"></div></div>
+
+  <div id="blackout" aria-hidden="true"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

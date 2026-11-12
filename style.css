@@ -1,0 +1,416 @@
+/* 甬上秋色 · 手势画册
+ * 宣纸、淡墨、朱砂；照片如装裱好的画页，文字是题签与题跋。
+ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --paper: #efe6d3;
+  --paper-light: #f7f0e1;
+  --ink: #2b2720;
+  --ink-soft: rgba(43, 39, 32, 0.62);
+  --ink-faint: rgba(43, 39, 32, 0.38);
+  --ink-ghost: rgba(43, 39, 32, 0.14);
+  --cinnabar: #9c3a2d;
+  --gold: #a9762f;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  user-select: none;
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+}
+
+#stage { position: fixed; inset: 0; display: block; }
+
+.hidden { display: none !important; }
+
+#hud { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+
+/* ---------- 朱砂印 ---------- */
+.seal {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--cinnabar);
+  color: #f8efe3;
+  border-radius: 2px;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  line-height: 1;
+  opacity: 0.9;
+  box-shadow: inset 0 0 0 1px rgba(255, 248, 238, 0.18);
+}
+.seal span { display: block; }
+.seal-brand { width: 27px; height: 27px; font-size: 13px; transform: rotate(1.6deg); }
+
+/* ---------- 左上：竖排题名 ---------- */
+#brand {
+  position: fixed;
+  left: clamp(26px, 4.2vw, 74px);
+  top: clamp(30px, 7.4vh, 92px);
+  pointer-events: none;
+}
+.brand-row { display: flex; align-items: flex-start; gap: clamp(12px, 1.2vw, 20px); }
+#brandTitle {
+  writing-mode: vertical-rl;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  font-size: clamp(34px, 3.1vw, 54px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: 0.22em;
+  color: var(--ink);
+}
+.brand-side { display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 3px; }
+.brand-en {
+  writing-mode: vertical-rl;
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 9px;
+  letter-spacing: 0.34em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* ---------- 左下：帧序与题跋 ---------- */
+#chapter {
+  position: fixed;
+  left: clamp(26px, 4.2vw, 74px);
+  bottom: clamp(30px, 6.4vh, 66px);
+  width: clamp(210px, 17vw, 326px);
+}
+.chap-meta {
+  display: flex; align-items: center;
+  font-size: 11px; letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+#idxNow { font-size: 13px; letter-spacing: 0.06em; color: var(--cinnabar); font-variant-numeric: tabular-nums; }
+.chap-slash { margin: 0 4px 0 3px; color: var(--ink-faint); }
+.chap-total { font-variant-numeric: tabular-nums; color: var(--ink-faint); }
+.chap-rule { flex: 1; height: 1px; background: var(--ink-ghost); margin: 0 12px; min-width: 18px; }
+.chap-place { font-size: 10px; letter-spacing: 0.24em; color: var(--ink-faint); white-space: nowrap; }
+
+#placeName {
+  margin-top: 15px;
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  font-size: clamp(27px, 2.5vw, 40px);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+}
+#caption {
+  margin-top: 11px;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: clamp(13px, 0.95vw, 16px);
+  line-height: 1.95;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+  min-height: 3.6em;
+}
+#ticks { display: flex; align-items: center; gap: 6px; margin-top: 20px; }
+#ticks span {
+  display: block;
+  width: 13px; height: 2px;
+  background: rgba(43, 39, 32, 0.16);
+  transition: background 0.5s ease, height 0.5s ease;
+}
+#ticks span.on { background: var(--cinnabar); height: 3px; }
+
+/* ---------- 声音 ---------- */
+#soundCtl {
+  position: fixed;
+  right: clamp(24px, 3.4vw, 54px);
+  top: clamp(22px, 4.2vh, 42px);
+  z-index: 4;
+  pointer-events: auto;
+}
+#soundBtn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 2px;
+  background: none; border: none;
+  color: var(--ink-faint);
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s, color 0.3s;
+}
+#soundBtn:hover { opacity: 0.95; }
+#soundBtn.muted { color: var(--cinnabar); opacity: 0.9; }
+#muteGlyph { font-size: 16px; line-height: 1; }
+.sound-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateX(5px);
+  transition: opacity 0.35s, transform 0.35s;
+}
+#soundBtn:hover .sound-label { opacity: 1; transform: translateX(0); }
+
+/* ---------- 摄像头回看 ---------- */
+#camWrap {
+  position: fixed;
+  right: clamp(18px, 2.4vw, 36px);
+  bottom: clamp(18px, 3vh, 34px);
+  width: clamp(168px, 16.5vw, 248px);
+  aspect-ratio: 16 / 9;
+  z-index: 6;
+  border: 1px solid rgba(43, 39, 32, 0.52);
+  border-radius: 5px;
+  overflow: hidden;
+  background: #2a2620;
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 8px 24px rgba(43, 39, 32, 0.24);
+}
+#camWrap.dragging { cursor: grabbing; }
+#cam { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; pointer-events: none; }
+#skel { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#handTags {
+  position: absolute; left: 0; right: 0; bottom: 4px;
+  display: flex; justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+}
+.hand-tag {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: #9c3a2d;
+  opacity: 0.2;
+  transition: opacity 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.hand-tag.on { opacity: 1; }
+
+/* ---------- 短提示 ---------- */
+#toast {
+  position: fixed;
+  left: 50%; top: clamp(24px, 4.4vh, 54px);
+  transform: translate(-50%, -6px);
+  z-index: 4;
+  padding: 7px 16px;
+  font-size: 11.5px;
+  letter-spacing: 0.20em;
+  color: var(--ink-soft);
+  background: rgba(247, 240, 226, 0.66);
+  border-radius: 2px;
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#errDetail {
+  position: fixed;
+  left: 50%; top: clamp(64px, 9.5vh, 100px);
+  transform: translateX(-50%);
+  z-index: 5;
+  max-width: min(72vw, 780px);
+  padding: 9px 14px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #8d3a2b;
+  background: rgba(248, 242, 232, 0.94);
+  border-left: 2px solid var(--cinnabar);
+  border-radius: 2px;
+  word-break: break-all;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
+/* ---------- 操作提示条 ---------- */
+#hint {
+  position: fixed;
+  left: 50%; bottom: clamp(16px, 2.6vh, 30px);
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  font-size: 10.5px;
+  letter-spacing: 0.15em;
+  color: var(--ink-soft);
+  background: rgba(247, 240, 226, 0.55);
+  border: 1px solid rgba(43, 39, 32, 0.10);
+  border-radius: 2px;
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  white-space: nowrap;
+}
+#hint.show { opacity: 1; }
+
+/* ---------- 进入页：封面 ---------- */
+#gate {
+  position: fixed; inset: 0; z-index: 10;
+  background: var(--paper);
+  transition: opacity 0.9s ease;
+}
+#gate.hide { opacity: 0; pointer-events: none; }
+#gateArt {
+  position: absolute; z-index: 0;
+  top: 0; right: 0; width: 60%; height: 100%;
+  background: url("assets/photos/01_east_new_city.jpg") center 52% / cover no-repeat;
+  opacity: 0.46;
+  filter: saturate(0.86) sepia(0.10) contrast(1.02);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 46%, #000 88%, rgba(0,0,0,0.55) 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 46%, #000 88%, rgba(0,0,0,0.55) 100%);
+}
+#gate::before {
+  content: "";
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(ellipse at 74% 26%, rgba(255, 226, 160, 0.20), transparent 56%),
+    linear-gradient(90deg, #efe6d3 0%, #efe6d3 30%, rgba(239, 230, 211, 0.72) 48%, rgba(239, 230, 211, 0.10) 78%, rgba(239, 230, 211, 0.26) 100%),
+    linear-gradient(178deg, rgba(255, 250, 238, 0.34) 0%, rgba(231, 219, 198, 0.28) 100%);
+  pointer-events: none;
+}
+.gate-panel {
+  position: absolute; z-index: 2;
+  left: clamp(28px, 8vw, 150px);
+  bottom: clamp(34px, 9.5vh, 116px);
+  max-width: 620px;
+}
+.gate-seal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  width: clamp(72px, 6.4vw, 96px);
+  height: clamp(72px, 6.4vw, 96px);
+  background: var(--cinnabar);
+  color: #f8efe3;
+  border-radius: 4px;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  font-size: clamp(23px, 1.9vw, 30px);
+  line-height: 1;
+  box-shadow: 0 6px 22px rgba(120, 58, 40, 0.18), inset 0 0 0 1px rgba(255, 248, 238, 0.20);
+  transform: rotate(-1.4deg);
+  margin-bottom: 26px;
+}
+.gate-overline {
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  color: rgba(43, 39, 32, 0.46);
+  margin-bottom: 20px;
+}
+.gate-panel h2 {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif;
+  font-size: clamp(38px, 4vw, 60px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.gate-guide {
+  margin-top: 18px;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "Songti SC", "SimSun", serif;
+  font-size: clamp(15px, 1.02vw, 18px);
+  letter-spacing: 0.15em;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+.gate-guide b { font-weight: 600; color: var(--ink); }
+.gate-guide-alt {
+  margin-top: 5px;
+  font-size: clamp(12px, 0.85vw, 14px);
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+}
+#startBtn {
+  margin-top: clamp(28px, 4.2vh, 44px);
+  padding: 10px 2px 9px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: 0.52em;
+  text-indent: 0.52em;
+  color: var(--ink);
+  cursor: pointer;
+  transition: color 0.35s, border-color 0.35s, letter-spacing 0.35s;
+}
+#startBtn:hover {
+  color: var(--cinnabar);
+  border-color: var(--cinnabar);
+  letter-spacing: 0.64em;
+}
+.gate-note {
+  margin-top: 26px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+}
+.gate-credit {
+  position: absolute; z-index: 2;
+  right: clamp(22px, 3.2vw, 48px);
+  bottom: clamp(18px, 3vh, 32px);
+  writing-mode: vertical-rl;
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", serif;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: rgba(43, 39, 32, 0.44);
+}
+
+/* ---------- 开场揭幕 ---------- */
+#reveal { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+.reveal-veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(178deg, #f5efe4 0%, #eee6d7 100%);
+  opacity: 1;
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
+}
+#reveal.play .reveal-veil { opacity: 0; }
+#reveal.fade { opacity: 0; transition: opacity 0.4s ease; }
+
+/* ---------- 纸色过渡 ---------- */
+#blackout {
+  position: fixed; inset: 0; z-index: 20;
+  background: #f1e8d7;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+#blackout.on { opacity: 1; }
+
+/* ---------- 演示模式：只留题名、帧序与题句 ---------- */
+body.demo #soundCtl,
+body.demo #camWrap,
+body.demo #toast,
+body.demo #errDetail,
+body.demo #hint { display: none !important; }
+body.demo #brand { transform: scale(1.06); transform-origin: left top; }
+body.demo #chapter { transform: scale(1.06); transform-origin: left bottom; }
+body.demo #ticks { opacity: 0.55; }
+
+/* ---------- 竖屏：改为上下版式 ---------- */
+@media (max-aspect-ratio: 1/1) {
+  #brand { left: 22px; top: 22px; }
+  .brand-row { align-items: center; gap: 11px; }
+  #brandTitle {
+    writing-mode: horizontal-tb;
+    font-size: 29px;
+    letter-spacing: 0.26em;
+    margin-right: -0.26em;
+    line-height: 1.1;
+  }
+  .brand-side { flex-direction: row; align-items: center; gap: 0; padding-top: 0; }
+  .brand-en { display: none; }
+  .seal-brand { width: 22px; height: 22px; font-size: 11px; }
+  #soundCtl { right: 16px; top: 18px; }
+  #chapter { left: 24px; right: 24px; bottom: auto; width: auto; max-width: calc(100% - 48px); overflow: hidden; }
+  .chap-meta { width: 100%; }
+  .chap-place { display: none; }
+  #placeName { font-size: 26px; }
+  #caption { font-size: 13px; min-height: 0; max-width: 84vw; }
+  #ticks { margin-top: 14px; }
+  #camWrap { width: 142px; right: 14px; bottom: 14px; }
+  #hint { display: none; }
+  #toast { top: 64px; width: max-content; max-width: 86vw; text-align: center; }
+  .gate-panel { left: 22px; right: 22px; bottom: 54px; max-width: none; }
+  .gate-panel h2 { font-size: clamp(30px, 8.6vw, 40px); }
+  .gate-guide { font-size: 14px; }
+  .gate-credit { display: none; }
+  #gateArt { width: 100%; opacity: 0.20; -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 64%); mask-image: linear-gradient(180deg, #000 0%, transparent 64%); }
+  #gate::before { background: linear-gradient(180deg, rgba(239,230,211,0.30) 0%, #efe6d3 64%, #efe6d3 100%); }
+}
